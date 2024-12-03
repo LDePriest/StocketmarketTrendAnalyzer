@@ -1,6 +1,7 @@
 import yfinance as yf
 from flask import Flask, render_template, jsonify, request, send_from_directory
 from multiprocessing import Pool, cpu_count, current_process
+import threading
 import numpy as np
 from sklearn.linear_model import LinearRegression
 from datetime import datetime, timedelta
@@ -24,16 +25,16 @@ def send_static(path):
     return send_from_directory('static', path)
 
 # Fetch stock data using Yahoo Finance
-def fetch_stock_data(symbol):
+def fetch_stock_data(symbol, results, index):
     try:
         stock = yf.Ticker(symbol)
         data = stock.history(period="1y")  # Fetch 1 year of historical data
         if data.empty:
             raise ValueError(f"No data found for {symbol}")
-        return data
+        results[index] = data
     except Exception as e:
         print(f"Error fetching data for {symbol}: {e}")
-        return None
+        results[index] = None
 
 # Predict future stock prices using linear regression
 def predict_future_prices(prices, days_ahead=5):
@@ -70,27 +71,40 @@ def log_cpu_usage(symbol, process_id):
     except Exception as e:
         print(f"Error logging CPU usage for {symbol}: {e}")
 
-# Process multiple stock data requests in parallel
+# Process multiple stock data requests in parallel using multiprocessing and multithreading
 def process_stocks(symbols):
+    # Create a list to store results for stock data
+    results = [None] * len(symbols)
+    threads = []
+
+    # Use threading to fetch stock data concurrently
+    for i, symbol in enumerate(symbols):
+        thread = threading.Thread(target=fetch_stock_data, args=(symbol, results, i))
+        threads.append(thread)
+        thread.start()
+
+    # Wait for all threads to finish
+    for thread in threads:
+        thread.join()
+
+    # Now process the stock data and generate trends and predictions using multiprocessing
     with Pool(processes=cpu_count()) as pool:
-        stock_data = pool.map(fetch_stock_data, symbols)
-        for i, symbol in enumerate(symbols):
-            log_cpu_usage(symbol, current_process().pid)
+        trends_predictions = pool.starmap(process_data, [(data, symbol) for data, symbol in zip(results, symbols)])
 
-    trends = []
-    predictions = []
+    trends, predictions = zip(*trends_predictions)
+    return list(trends), list(predictions)
 
-    for data in stock_data:
-        if data is not None:
-            trend = calculate_trend(data)
-            trends.append(trend)
-            predicted_prices = predict_future_prices(data)
-            predictions.append(predicted_prices)
-        else:
-            trends.append([])
-            predictions.append([])
-
-    return trends, predictions
+# Helper function to process data (used in multiprocessing pool)
+def process_data(data, symbol):
+    if data is not None:
+        trend = calculate_trend(data)
+        predicted_prices = predict_future_prices(data)
+    else:
+        trend = []
+        predicted_prices = []
+    
+    log_cpu_usage(symbol, current_process().pid)
+    return trend, predicted_prices
 
 # Get CPU cores information
 def get_cpu_cores():
