@@ -88,7 +88,17 @@ def process_stocks(symbols):
 
     return trends, predictions
 
-# Endpoint to fetch trends and predictions
+# Get CPU cores information
+def get_cpu_cores():
+    if os.name == 'posix':
+        core_count = len(os.sched_getaffinity(0))  # Number of CPU cores in use
+    elif os.name == 'nt':
+        core_count = os.cpu_count()  # Number of CPU cores in total
+    else:
+        core_count = cpu_count()  # Default to the available cores in multiprocessing
+    return core_count
+
+# Endpoint to fetch trends, predictions, and CPU core info
 @app.route('/get_trends', methods=['POST'])
 def get_trends():
     symbols = request.json.get('symbols', [])
@@ -98,9 +108,13 @@ def get_trends():
     # Process stocks in parallel and get trends and predictions
     trends, predictions = process_stocks(symbols)
     
+    # Get CPU core count information
+    cpu_cores = get_cpu_cores()
+    
     response = {
         'trends': trends,
         'predictions': predictions,
+        'cpu_cores': cpu_cores,  # Include CPU cores info
         'status': 'success',
         'message': 'Trends and predictions calculated successfully',
     }

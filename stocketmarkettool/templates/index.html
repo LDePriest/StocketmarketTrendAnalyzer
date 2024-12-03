@@ -6,6 +6,7 @@
     <title>Stock Market Analysis Tool</title>
     <link rel="stylesheet" type="text/css" href="/static/style.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom"></script> <!-- Added plugin -->
 </head>
 <body>
     <h1>Stock Market Analysis Tool</h1>
@@ -13,15 +14,25 @@
     <input type="text" id="symbols" name="symbols" placeholder="e.g., AAPL, GOOG, MSFT">
     <br>
     <button onclick="getStockTrends()">Get Stock Information</button>
+
+    <!-- CPU Cores Information -->
+    <div id="cpu-cores"></div>
+
+    <!-- Displaying Results -->
     <div id="results"></div>
+
+    <!-- Chart for Trends -->
     <div class="chart-container">
         <canvas id="trendChart"></canvas>
     </div>
 
     <script>
+        let myChart;
+
         async function getStockTrends() {
             const symbols = document.getElementById('symbols').value.split(',').map(s => s.trim());
             const resultsDiv = document.getElementById('results');
+            const cpuCoresDiv = document.getElementById('cpu-cores');
             const ctx = document.getElementById('trendChart').getContext('2d');
 
             resultsDiv.innerHTML = '<p>Loading trends...</p>';
@@ -34,6 +45,7 @@
                     },
                     body: JSON.stringify({ symbols: symbols })
                 });
+
                 const data = await response.json();
 
                 if (data.error) {
@@ -43,6 +55,11 @@
 
                 const trends = data.trends;
                 const predictions = data.predictions;
+                const cpuCores = data.cpu_cores;  // Get CPU cores data
+
+                // Display CPU cores info
+                cpuCoresDiv.innerHTML = `<p>Your computer is using ${cpuCores} physical CPU cores.</p>`;
+
                 resultsDiv.innerHTML = '<h3>Stock Trends and Predictions:</h3>';
 
                 // Create chart data
@@ -67,10 +84,10 @@
                 });
 
                 // Clear and render the chart
-                if (window.myChart) {
-                    window.myChart.destroy();
+                if (myChart) {
+                    myChart.destroy();
                 }
-                window.myChart = new Chart(ctx, {
+                myChart = new Chart(ctx, {
                     type: 'line',
                     data: {
                         labels: Array.from({ length: Math.max(...trends.map(t => t.length)) }, (_, i) => `Day ${i + 1}`),
@@ -81,10 +98,24 @@
                         plugins: {
                             legend: {
                                 position: 'top'
+                            },
+                            zoom: {
+                                pan: {
+                                    enabled: true,
+                                    mode: 'xy', // Enable panning in both x and y directions
+                                    speed: 10,   // Speed of panning
+                                },
+                                zoom: {
+                                    enabled: true,
+                                    mode: 'xy', // Enable zooming in both x and y directions
+                                    sensitivity: 3,
+                                    threshold: 2
+                                }
                             }
                         }
                     }
                 });
+
             } catch (error) {
                 console.error('Error fetching trends:', error);
                 resultsDiv.innerHTML = '<p>Error fetching trends. Please try again later.</p>';
@@ -98,6 +129,7 @@
             const b = Math.floor(Math.random() * 255);
             return `rgb(${r}, ${g}, ${b})`;
         }
+
     </script>
 </body>
 </html>
