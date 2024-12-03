@@ -5,7 +5,7 @@ import numpy as np
 from sklearn.linear_model import LinearRegression
 from datetime import datetime, timedelta
 import os
-
+#hello
 app = Flask(__name__)
 
 # Serve the index.html file
