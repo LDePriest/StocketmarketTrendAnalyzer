@@ -1,30 +1,37 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Stock Market Analysis Tool</title>
-    <link rel="stylesheet" type="text/css" href="/static/style.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom"></script> <!-- Added plugin -->
-    <script src="/static/functions.js" defer></script> <!-- Link to your JS file -->
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Stock Market Analysis Tool</title>
+<link rel="stylesheet" type="text/css" href="/static/style.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom"></script> <!-- Added plugin -->
+<script src="/static/functions.js" defer></script> <!-- Link to JS file -->
 </head>
 <body>
-    <h1>Stock Market Analysis Tool</h1>
-    <label for="symbols">Enter Stock Symbols (comma separated):</label>
-    <input type="text" id="symbols" name="symbols" placeholder="e.g., AAPL, GOOG, MSFT">
-    <br>
-    <button onclick="getStockTrends()">Get Stock Information</button>
+<!-- Navigation Bar -->
+<nav>
+    <ul>
+        <li><a href="/">Home</a></li>
+        <li><a href="/discussion">Discussion Post</a></li>
+        <li><a href="/ai-investment-helper">AI Stock Investment Helper</a></li>
+    </ul>
+</nav>
 
-    <!-- CPU Cores Information -->
-    <div id="cpu-cores"></div>
+<h1>Stock Market Analysis Tool</h1>
 
-    <!-- Displaying Results -->
-    <div id="results"></div>
+<label for="symbols">Enter Stock Symbols (comma separated):</label>
+<input type="text" id="symbols" name="symbols" placeholder="e.g., AAPL, GOOG, MSFT">
+<br>
+<button onclick="getStockTrends()">Get Stock Information</button>
 
-    <!-- Chart for Trends -->
-    <div class="chart-container">
-        <canvas id="trendChart"></canvas>
-    </div>
+<!-- CPU Cores Information -->
+<div id="cpu-cores"></div>
+
+<!-- Displaying Results -->
+<div id="results"></div>
+
+<!-- Chart for Trends -->
+<div class="chart-container">
+    <canvas id="trendChart"></canvas>
+</div>
 </body>
 </html>

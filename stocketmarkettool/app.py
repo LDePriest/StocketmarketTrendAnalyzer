@@ -14,6 +14,10 @@ app = Flask(__name__)
 def index():
     return render_template('index.html')
 
+@app.route('/discussion')
+def discussion():
+    return render_template('discussion.html')
+
 # Custom route for serving static files
 @app.route('/static/<path:path>')
 def send_static(path):

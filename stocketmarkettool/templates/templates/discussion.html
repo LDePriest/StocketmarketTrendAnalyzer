@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Discussion Post</title>
+    <link rel="stylesheet" type="text/css" href="/static/style.css">
+    <script src="/static/discussion.js" defer></script>
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav>
+        <ul>
+            <li><a href="/">Home</a></li>
+            <li><li><a href="/discussion">Discussion Post</a></li>
+            <li><a href="/ai-investment-helper">Investment Helper</a></li>
+        </ul>
+    </nav>
+
+    <h1>Discussion Post</h1>
+
+    <div id="discussion-container">
+        <!-- Discussion Form -->
+        <form id="discussion-form">
+            <label for="username">Username:</label>
+            <input type="text" id="username" name="username" placeholder="Enter your name" required>
+            <br>
+
+            <label for="post-content">Post:</label>
+            <textarea id="post-content" name="post-content" placeholder="Share your thoughts" required></textarea>
+            <br>
+
+            <button type="submit">Post</button>
+        </form>
+
+        <!-- Discussion Posts -->
+        <h2>Recent Discussions</h2>
+        <div id="posts">
+            <!-- Posts will dynamically populate here -->
+        </div>
+    </div>
+</body>
+</html>
