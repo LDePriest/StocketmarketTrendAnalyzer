@@ -1,9 +1,10 @@
 import yfinance as yf
 from flask import Flask, render_template, jsonify, request, send_from_directory
-from multiprocessing import Pool, cpu_count
+from multiprocessing import Pool, cpu_count, current_process
 import numpy as np
 from sklearn.linear_model import LinearRegression
 from datetime import datetime, timedelta
+import os
 
 app = Flask(__name__)
 
@@ -54,12 +55,30 @@ def calculate_trend(prices, window_size=5):
     trend = np.convolve(closing_prices, np.ones(window_size), 'valid') / window_size
     return trend.tolist()
 
+# Function to log and display CPU core usage
+def log_cpu_usage(symbol, process_id):
+    try:
+        # Check if running on Unix-like system (Linux/macOS)
+        if os.name == 'posix':
+            core = os.sched_getaffinity(0)  # Get the CPU core the process is using
+            print(f"Process {process_id} for symbol {symbol} is running on CPU cores: {core}")
+        elif os.name == 'nt':  # Windows
+            # Log the process ID and the number of available CPUs
+            num_cores = os.cpu_count()  # Windows doesn't expose core affinity, but we can log available CPUs
+            print(f"Process {process_id} for symbol {symbol} (Windows) is using {num_cores} cores.")
+    except Exception as e:
+        print(f"Error logging CPU usage for {symbol}: {e}")
+
 # Function to process multiple stock data requests in parallel
 def process_stocks(symbols):
     # Create a pool of workers based on the number of CPU cores
     with Pool(processes=cpu_count()) as pool:
         # Fetch stock data concurrently
         stock_data = pool.map(fetch_stock_data, symbols)
+        
+        # Log which process is using which core
+        for i, symbol in enumerate(symbols):
+            log_cpu_usage(symbol, current_process().pid)
 
     trends = []
     predictions = []
